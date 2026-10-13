@@ -26,12 +26,23 @@ export default function BangCongPage() {
 
   function classKyHieu(ky) {
     if (!cfg || !ky) return '';
+
+    // Ký hiệu chuẩn
     if (ky === cfg.KY_HIEU_DU_GIO) return 'text-green-600 font-bold';
-    if (ky === cfg.KY_HIEU_NUA_NGAY) return 'text-orange-500 font-bold';
-    if (ky === cfg.KY_HIEU_THIEU_GIO) return 'text-gray-400 font-bold text-xs';
     if (ky === cfg.KY_HIEU_NGHI_PHEP) return 'text-blue-500 font-bold';
     if (ky === cfg.KY_HIEU_NGHI_LE) return 'text-purple-500 font-bold';
     if (ky === cfg.KY_HIEU_NGHI_KHONG_LUONG) return 'text-red-500 font-bold';
+    if (ky === cfg.KY_HIEU_NUA_NGAY) return 'text-orange-500 font-bold';
+    if (ky === cfg.KY_HIEU_THIEU_GIO) return 'text-gray-400 font-bold text-xs';
+
+    // ⭐ Số thập phân (VD: 0.88, 0.63)
+    if (/^\d+\.\d+$/.test(ky)) {
+      const val = parseFloat(ky);
+      if (val >= 0.75) return 'text-green-500 font-semibold text-[10px]';
+      if (val >= 0.5) return 'text-orange-500 font-semibold text-[10px]';
+      if (val > 0) return 'text-gray-500 font-semibold text-[10px]';
+    }
+
     return 'font-bold';
   }
 
@@ -104,14 +115,24 @@ export default function BangCongPage() {
           <div className="mt-5 pt-5 border-t border-gray-100">
             <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
               Chú thích ký hiệu
+              {data?.cheDo === 'THEO_TY_LE' && (
+                <span className="ml-2 text-indigo-600 normal-case">
+                  (Tính theo tỷ lệ giờ)
+                </span>
+              )}
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <LegendItem ky={cfg.KY_HIEU_DU_GIO} mo="Đủ giờ" mau="green" />
-              <LegendItem ky={cfg.KY_HIEU_NUA_NGAY} mo="Nửa ngày" mau="orange" />
+              {data?.cheDo !== 'THEO_TY_LE' && (
+                <LegendItem ky={cfg.KY_HIEU_NUA_NGAY} mo="Nửa ngày" mau="orange" />
+              )}
               <LegendItem ky={cfg.KY_HIEU_THIEU_GIO} mo="Thiếu giờ" mau="gray" />
               <LegendItem ky={cfg.KY_HIEU_NGHI_PHEP} mo="Nghỉ phép" mau="blue" />
               <LegendItem ky={cfg.KY_HIEU_NGHI_LE} mo="Nghỉ lễ" mau="purple" />
               <LegendItem ky={cfg.KY_HIEU_NGHI_KHONG_LUONG} mo="Nghỉ K.Lương" mau="red" />
+              {data?.cheDo === 'THEO_TY_LE' && (
+                <LegendItem ky="0.88" mo="7h/8h" mau="orange" />
+              )}
             </div>
           </div>
         )}
@@ -156,9 +177,8 @@ export default function BangCongPage() {
                     {Array.from({ length: data.soNgayTrongThang }, (_, i) => i + 1).map((d) => (
                       <th
                         key={d}
-                        className={`p-2 text-center w-9 text-xs font-bold ${
-                          laCuoiTuan(d) ? 'bg-red-50 text-red-600' : 'text-gray-500'
-                        }`}
+                        className={`p-2 text-center w-9 text-xs font-bold ${laCuoiTuan(d) ? 'bg-red-50 text-red-600' : 'text-gray-500'
+                          }`}
                       >
                         {d}
                       </th>
@@ -186,11 +206,9 @@ export default function BangCongPage() {
                         return (
                           <td
                             key={d}
-                            className={`text-center p-1 transition ${
-                              laCuoiTuan(d) ? 'bg-red-50/40' : ''
-                            } ${
-                              isAdmin ? 'cursor-pointer hover:bg-indigo-100' : ''
-                            }`}
+                            className={`text-center p-1 transition ${laCuoiTuan(d) ? 'bg-red-50/40' : ''
+                              } ${isAdmin ? 'cursor-pointer hover:bg-indigo-100' : ''
+                              }`}
                             onClick={() => {
                               if (!isAdmin) return;
                               setModalData({ maNV: nv.maNV, hoTen: nv.hoTen, ngay: ngayStr });
@@ -276,9 +294,8 @@ export default function BangCongPage() {
                             const ngayStr = `${String(item.ngay).padStart(2, '0')}/${String(thang).padStart(2, '0')}/${nam}`;
                             setModalData({ maNV: nv.maNV, hoTen: nv.hoTen, ngay: ngayStr });
                           }}
-                          className={`w-10 h-10 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition ${classKyHieuMobile(item.ky)} ${
-                            isAdmin ? 'cursor-pointer hover:scale-110 active:scale-95' : ''
-                          }`}
+                          className={`w-10 h-10 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition ${classKyHieuMobile(item.ky)} ${isAdmin ? 'cursor-pointer hover:scale-110 active:scale-95' : ''
+                            }`}
                         >
                           <span className="text-[9px] opacity-70">{item.ngay}</span>
                           <span className="text-sm leading-none">{item.ky}</span>
